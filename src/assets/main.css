@@ -1,0 +1,94 @@
+@import 'tailwindcss';
+
+/* Class-based dark mode (toggled on <html class="dark">) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand — terracotta */
+  --color-brand-50: #fdf6f3;
+  --color-brand-100: #fbe9e1;
+  --color-brand-200: #f6cfbf;
+  --color-brand-300: #efac92;
+  --color-brand-400: #e58563;
+  --color-brand-500: #d9633e;
+  --color-brand-600: #c44e2c;
+  --color-brand-700: #a33d24;
+  --color-brand-800: #843423;
+  --color-brand-900: #6d2e21;
+  --color-brand-950: #3b150e;
+
+  /* Accent — gold */
+  --color-gold-50: #fbf7ec;
+  --color-gold-100: #f6ecca;
+  --color-gold-200: #edd693;
+  --color-gold-300: #e3bd5b;
+  --color-gold-400: #dca838;
+  --color-gold-500: #c8902a;
+  --color-gold-600: #b0701f;
+  --color-gold-700: #8c521c;
+  --color-gold-800: #74421e;
+  --color-gold-900: #63381d;
+  --color-gold-950: #391c0d;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius-xl2: 1.25rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-stone-50 text-stone-800 antialiased dark:bg-stone-950 dark:text-stone-100;
+    font-family: var(--font-sans);
+  }
+  /* Nicer focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-950;
+  }
+}
+
+@layer components {
+  .sm-card {
+    @apply rounded-2xl border border-stone-200 bg-white shadow-sm transition-colors dark:border-stone-800 dark:bg-stone-900;
+  }
+  .sm-field {
+    @apply w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-stone-800 shadow-sm transition placeholder:text-stone-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 dark:placeholder:text-stone-500;
+  }
+  .sm-label {
+    @apply mb-1.5 block text-sm font-medium text-stone-600 dark:text-stone-300;
+  }
+}
+
+/* Hide number-input spinner arrows everywhere */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Thin, themed scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-stone-300) transparent;
+}
+.dark * {
+  scrollbar-color: var(--color-stone-700) transparent;
+}
+
+/* Route transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.fade-leave-to {
+  opacity: 0;
+}

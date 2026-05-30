@@ -1,11 +1,21 @@
-<script setup></script>
+<script setup>
+import { onMounted, ref } from 'vue'
+import { RouterView } from 'vue-router'
+import { useUiStore } from '@/stores/ui'
+import { useConfirm } from '@/composables/useConfirm'
+import ToastHost from '@/components/ui/ToastHost.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+
+// Initialize UI store (applies persisted theme + locale on load).
+useUiStore()
+
+const { registerConfirm } = useConfirm()
+const confirmDialog = ref(null)
+onMounted(() => registerConfirm(confirmDialog.value))
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <RouterView />
+  <ToastHost />
+  <ConfirmDialog ref="confirmDialog" />
 </template>
-
-<style scoped></style>

@@ -1,44 +1,35 @@
-# sarpo-front
+# Sarpo Mexa 🎁
 
-This template should help get you started developing with Vue 3 in Vite.
+Прототип веб-приложения для сервиса оформления и доставки подарков «Sarpo Mexa».
+Клиент собирает подарок в **коробке** (box) из товаров и указывает дату доставки;
+сотрудники управляют заказами, товарами, складом и клиентами через админ-панель.
 
-## Recommended IDE Setup
+> Это демонстрационный прототип: данные хранятся в браузере (localStorage), бэкенда нет.
+> Все операции (добавление / изменение / удаление) работают локально.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Стек
 
-## Recommended Browser Setup
+- **Vue 3** (`<script setup>`) + **Vite**
+- **Tailwind CSS v4** — тёплая палитра (терракот + золото), светлая/тёмная тема
+- **Pinia** — состояние и тестовые данные с сохранением в localStorage
+- **Vue Router** — две зоны: магазин и админка
+- **vue-i18n** — мультиязычность: русский (по умолчанию) и узбекский
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Запуск
 
 ```sh
 npm install
+npm run dev      # http://localhost:5173
+npm run build    # сборка
+npm run lint     # проверка кода
 ```
 
-### Compile and Hot-Reload for Development
+## Структура
 
-```sh
-npm run dev
-```
+- `src/views/store/` — витрина: главная, каталог, товар, коробка, оформление
+- `src/views/admin/` — админка: дашборд, заказы, товары, категории, клиенты, склад, пользователи
+- `src/components/` — UI-компоненты (`ui/`, `layout/`, `store/`)
+- `src/stores/` — Pinia: `data` (сущности + сид), `cart` (коробка), `ui` (тема/язык)
+- `src/i18n/` — переводы `ru` / `uz`
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+Чтобы сбросить демо-данные: очистите localStorage (ключи `sm.*`) или вызовите `resetDemo()` из store `data`.
