@@ -17,15 +17,6 @@ export function useTelegram() {
     tg.disableVerticalSwipes?.()
   }
 
-  function setMainButton(text, onClick) {
-    if (!tg) return
-    const mb = tg.MainButton
-    if (mainHandler) mb.offClick(mainHandler)
-    mainHandler = onClick
-    mb.setText(text)
-    mb.onClick(onClick)
-    mb.show()
-  }
   function hideMainButton() {
     if (!tg) return
     if (mainHandler) tg.MainButton.offClick(mainHandler)
@@ -60,5 +51,5 @@ export function useTelegram() {
     }
   }
 
-  return { tg, isTelegram, ready, setMainButton, hideMainButton, setBackButton, setHeaderColor, haptic }
+  return { tg, isTelegram, ready, hideMainButton, setBackButton, setHeaderColor, haptic }
 }
