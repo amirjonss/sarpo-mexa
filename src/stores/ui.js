@@ -37,6 +37,9 @@ export const useUiStore = defineStore('ui', () => {
   function toggleTheme() {
     theme.value = theme.value === 'dark' ? 'light' : 'dark'
   }
+  function setTheme(v) {
+    if (v === 'dark' || v === 'light') theme.value = v
+  }
 
   watch(locale, (v) => {
     i18n.global.locale.value = v
@@ -56,5 +59,5 @@ export const useUiStore = defineStore('ui', () => {
     locale.value = locale.value === 'ru' ? 'uz' : 'ru'
   }
 
-  return { theme, locale, toggleTheme, setLocale, toggleLocale }
+  return { theme, locale, toggleTheme, setTheme, setLocale, toggleLocale }
 })

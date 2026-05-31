@@ -5,6 +5,7 @@ import { useDataStore, localized } from '@/stores/data'
 import { useCartStore } from '@/stores/cart'
 import { useFormat } from '@/composables/useFormat'
 import { useToast } from '@/composables/useToast'
+import { useTelegram } from '@/composables/useTelegram'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 
@@ -15,6 +16,7 @@ const data = useDataStore()
 const cart = useCartStore()
 const { money } = useFormat()
 const toast = useToast()
+const { haptic } = useTelegram()
 
 const form = reactive({ name: '', phone: '', address: '', targetDate: '', note: '' })
 const errors = reactive({ name: false, phone: false, targetDate: false })
@@ -75,6 +77,7 @@ function submit() {
   form.note = ''
   paid.value = 0
   toast.success(t('builder.created', { id: orderId }))
+  haptic('success')
   emit('created', orderId)
 }
 </script>

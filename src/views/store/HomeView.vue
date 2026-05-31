@@ -1,11 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDataStore, localized } from '@/stores/data'
 import { useCartStore } from '@/stores/cart'
 import { useFormat } from '@/composables/useFormat'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import { useTelegram } from '@/composables/useTelegram'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 import OrderPanel from '@/components/store/OrderPanel.vue'
@@ -36,6 +37,19 @@ const filtered = computed(() => {
 function onCreated() {
   mobilePanel.value = false
 }
+
+// Telegram native MainButton: opens the order panel from anywhere.
+const { isTelegram, setMainButton, hideMainButton } = useTelegram()
+watch(
+  [() => cart.isEmpty, mobilePanel],
+  () => {
+    if (!isTelegram) return
+    if (cart.isEmpty || mobilePanel.value) hideMainButton()
+    else setMainButton(`${t('builder.openBox')} · ${money(cart.total)}`, () => (mobilePanel.value = true))
+  },
+  { immediate: true },
+)
+onUnmounted(() => hideMainButton())
 
 async function resetDemo() {
   if (await confirm(t('builder.resetConfirm'))) {
