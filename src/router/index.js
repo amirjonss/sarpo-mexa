@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 import StoreLayout from '@/layouts/StoreLayout.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { trackPageView } from '@/composables/useAnalytics'
 
 const routes = [
   {
@@ -44,6 +45,12 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     return savedPosition || { top: 0 }
   },
+})
+
+// Log every visit/navigation to Telegram. afterEach also fires on the initial
+// load, so this covers both the first entry and each subsequent page change.
+router.afterEach((to) => {
+  trackPageView(to)
 })
 
 export default router
