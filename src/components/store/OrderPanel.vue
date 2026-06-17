@@ -10,6 +10,7 @@ import { isValidPhone } from '@/composables/usePhone'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import MoneyInput from '@/components/ui/MoneyInput.vue'
 import PhoneInput from '@/components/ui/PhoneInput.vue'
+import DateTimePicker from '@/components/ui/DateTimePicker.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 
 const emit = defineEmits(['created'])
@@ -22,7 +23,6 @@ const toast = useToast()
 const { haptic } = useTelegram()
 
 const form = reactive({ name: '', phone: '', address: '', targetDate: '', returnDate: '', note: '' })
-const deposit = ref(0) // залог (rental deposit) collected at handover
 const errors = reactive({ name: false, phone: false, targetDate: false })
 
 // Pick an existing client (fills name + phone) or leave blank to create a new one.
@@ -95,7 +95,6 @@ function submit() {
     clientId,
     targetDate: form.targetDate,
     returnDate: form.returnDate,
-    deposit: Number(deposit.value) || 0,
     address: form.address.trim(),
     note: form.note.trim(),
     paid: Number(paid.value) || 0,
@@ -116,7 +115,6 @@ function submit() {
   clientSearch.value = ''
   selectedClientId.value = null
   paid.value = 0
-  deposit.value = 0
   toast.success(t('builder.created', { id: orderId }))
   haptic('success')
   emit('created', orderId)
@@ -245,17 +243,12 @@ function submit() {
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="sm-label">{{ t('builder.issueDate') }}</label>
-          <input v-model="form.targetDate" type="datetime-local" :min="minDate" class="sm-field" :class="errors.targetDate && '!border-red-500'" />
+          <DateTimePicker v-model="form.targetDate" :min="minDate" :placeholder="t('datepicker.select')" :class="errors.targetDate && '[&_.sm-field]:!border-red-500'" />
         </div>
         <div>
           <label class="sm-label">{{ t('builder.returnDate') }}</label>
-          <input v-model="form.returnDate" type="datetime-local" :min="form.targetDate || minDate" class="sm-field" />
+          <DateTimePicker v-model="form.returnDate" :min="form.targetDate || minDate" :placeholder="t('datepicker.select')" />
         </div>
-      </div>
-      <div>
-        <label class="sm-label">{{ t('builder.deposit') }}</label>
-        <MoneyInput v-model="deposit" class="sm-field" placeholder="0" />
-        <p class="mt-1 text-xs text-stone-400">{{ t('builder.depositHint') }}</p>
       </div>
       <div>
         <textarea v-model="form.note" rows="2" class="sm-field resize-none" :placeholder="t('builder.notePlaceholder')" />

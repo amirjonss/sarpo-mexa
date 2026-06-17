@@ -198,7 +198,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   // ---- Orders --------------------------------------------------------------
-  function addOrder({ clientId, targetDate, returnDate = '', deposit = 0, address, note, items, status = 'new', paid = 0 }) {
+  function addOrder({ clientId, targetDate, returnDate = '', address, note, items, status = 'new', paid = 0 }) {
     const id = orders.value.length ? Math.max(...orders.value.map((o) => o.id)) + 1 : 1001
     const built = items.map((it, idx) => ({
       id: idx + 1,
@@ -213,8 +213,6 @@ export const useDataStore = defineStore('data', () => {
       clientId,
       targetDate,
       returnDate: returnDate || '',
-      deposit: Math.max(0, Number(deposit) || 0),
-      depositRefunded: false,
       conditionNote: '',
       address: address || '',
       status,
@@ -253,16 +251,10 @@ export const useDataStore = defineStore('data', () => {
     if (!o) return
     if (patch.targetDate !== undefined) o.targetDate = patch.targetDate
     if (patch.returnDate !== undefined) o.returnDate = patch.returnDate
-    if (patch.deposit !== undefined) o.deposit = Math.max(0, Number(patch.deposit) || 0)
     if (patch.address !== undefined) o.address = patch.address
     if (patch.note !== undefined) o.note = patch.note
     if (patch.conditionNote !== undefined) o.conditionNote = patch.conditionNote
     if (patch.clientId !== undefined) o.clientId = Number(patch.clientId)
-  }
-  // Залог: пометить возвращён ли депозит клиенту (после возврата комплекта).
-  function setDepositRefunded(id, value) {
-    const o = orderById(id)
-    if (o) o.depositRefunded = !!value
   }
   function orderById(id) {
     return orders.value.find((o) => o.id === Number(id))
@@ -456,7 +448,6 @@ export const useDataStore = defineStore('data', () => {
     addOrder,
     updateOrderStatus,
     updateOrder,
-    setDepositRefunded,
     productCapacity,
     productReservedOn,
     productAvailableOn,

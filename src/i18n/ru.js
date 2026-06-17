@@ -93,8 +93,6 @@ export default {
     targetDate: 'Дата доставки',
     issueDate: 'Дата выдачи',
     returnDate: 'Дата возврата',
-    deposit: 'Залог',
-    depositHint: 'Возвращается клиенту после сдачи комплекта',
     note: 'Комментарий',
     notePlaceholder: 'Например: позвонить за час до доставки',
     create: 'Создать заказ',
@@ -173,7 +171,6 @@ export default {
     rentalOut: 'Коробки у клиента — ожидаем возврата',
     rentalHint: 'При статусе «Закрыто» или «Отменён» коробки вернутся на склад.',
     rental: 'Аренда',
-    depositRefunded: 'Залог возвращён клиенту',
     condition: 'Состояние при возврате',
     conditionPlaceholder: 'Например: всё в порядке / скол на подносе',
   },
@@ -185,6 +182,11 @@ export default {
     delivered: 'Доставлен',
     returned: 'Закрыто',
     cancelled: 'Отменён',
+  },
+  datepicker: {
+    select: 'Выберите дату',
+    done: 'Готово',
+    clear: 'Очистить',
   },
   calendar: {
     title: 'Календарь брони',

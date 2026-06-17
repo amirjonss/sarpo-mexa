@@ -183,7 +183,7 @@ async function remove(s) {
           </div>
           <p v-else class="rounded-lg border border-dashed border-stone-300 py-4 text-center text-xs text-stone-400 dark:border-stone-700">{{ t('sets.noItems') }}</p>
           <div v-if="form.items.length" class="mt-2 flex justify-between text-sm font-semibold text-stone-700 dark:text-stone-200">
-            <span>{{ t('builder.boxTitle') }}</span>
+            <span>{{ t('common.total') }}</span>
             <span>{{ money(formTotal) }}</span>
           </div>
         </div>

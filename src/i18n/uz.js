@@ -93,8 +93,6 @@ export default {
     targetDate: 'Yetkazish sanasi',
     issueDate: 'Berish sanasi',
     returnDate: 'Qaytarish sanasi',
-    deposit: 'Garov',
-    depositHint: 'To‘plam qaytarilgach mijozga qaytariladi',
     note: 'Izoh',
     notePlaceholder: 'Masalan: yetkazishdan bir soat oldin qo‘ng‘iroq qiling',
     create: 'Buyurtma yaratish',
@@ -173,7 +171,6 @@ export default {
     rentalOut: 'Qutilar mijozda — qaytarilishi kutilmoqda',
     rentalHint: '«Yopildi» yoki «Bekor qilindi» holatida qutilar omborga qaytadi.',
     rental: 'Ijara',
-    depositRefunded: 'Garov mijozga qaytarildi',
     condition: 'Qaytarishdagi holati',
     conditionPlaceholder: 'Masalan: hammasi joyida / laganda chetida nuqson',
   },
@@ -185,6 +182,11 @@ export default {
     delivered: 'Yetkazildi',
     returned: 'Yopildi',
     cancelled: 'Bekor qilindi',
+  },
+  datepicker: {
+    select: 'Sanani tanlang',
+    done: 'Tayyor',
+    clear: 'Tozalash',
   },
   calendar: {
     title: 'Bron kalendari',

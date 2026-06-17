@@ -4,7 +4,7 @@
 // Each category is a design "set" (набор); product photos live in /public/products/<set>/.
 
 // Bump whenever seed data changes so existing localStorage is refreshed.
-export const SEED_VERSION = 8
+export const SEED_VERSION = 9
 
 // `returned` = boxes came back from the client; closing an order restores stock (rental).
 export const ORDER_STATUSES = ['new', 'packing', 'ready', 'delivering', 'delivered', 'returned', 'cancelled']
@@ -116,8 +116,6 @@ export function buildSeed() {
       clientId: 1,
       targetDate: addDaysAt(2, 14, 0),
       returnDate: addDaysAt(4, 12, 0),
-      deposit: 500000,
-      depositRefunded: false,
       conditionNote: '',
       status: 'packing',
       returned: false,
@@ -136,8 +134,6 @@ export function buildSeed() {
       clientId: 2,
       targetDate: addDaysAt(5, 11, 30),
       returnDate: addDaysAt(7, 12, 0),
-      deposit: 400000,
-      depositRefunded: false,
       conditionNote: '',
       status: 'new',
       returned: false,
@@ -155,8 +151,6 @@ export function buildSeed() {
       clientId: 3,
       targetDate: addDaysAt(-3, 16, 0),
       returnDate: addDaysAt(-1, 12, 0),
-      deposit: 450000,
-      depositRefunded: false,
       conditionNote: '',
       status: 'delivered',
       returned: false,
@@ -174,8 +168,6 @@ export function buildSeed() {
       clientId: 1,
       targetDate: addDaysAt(1, 10, 0),
       returnDate: addDaysAt(3, 12, 0),
-      deposit: 500000,
-      depositRefunded: false,
       conditionNote: '',
       status: 'ready',
       returned: false,

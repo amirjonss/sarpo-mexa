@@ -13,6 +13,7 @@ import StatusBadge from '@/components/ui/StatusBadge.vue'
 import QtyStepper from '@/components/ui/QtyStepper.vue'
 import MoneyInput from '@/components/ui/MoneyInput.vue'
 import PhoneInput from '@/components/ui/PhoneInput.vue'
+import DateTimePicker from '@/components/ui/DateTimePicker.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 import ProductPickerModal from '@/components/store/ProductPickerModal.vue'
 import IconTrash from '@/components/ui/IconTrash.vue'
@@ -74,14 +75,13 @@ function pick(pid) {
 
 // ---- Edit recipient + delivery details ----
 const editing = ref(false)
-const edit = reactive({ name: '', phone: '', targetDate: '', returnDate: '', deposit: 0, address: '', note: '' })
+const edit = reactive({ name: '', phone: '', targetDate: '', returnDate: '', address: '', note: '' })
 
 function startEdit() {
   edit.name = client.value?.name || ''
   edit.phone = client.value?.phone || ''
   edit.targetDate = order.value.targetDate || ''
   edit.returnDate = order.value.returnDate || ''
-  edit.deposit = order.value.deposit || 0
   edit.address = order.value.address || ''
   edit.note = order.value.note || ''
   editing.value = true
@@ -96,7 +96,6 @@ function saveEdit() {
   data.updateOrder(order.value.id, {
     targetDate: edit.targetDate,
     returnDate: edit.returnDate,
-    deposit: Number(edit.deposit) || 0,
     address: edit.address.trim(),
     note: edit.note.trim(),
   })
@@ -108,10 +107,6 @@ const conditionNote = ref('')
 watch(order, (o) => { conditionNote.value = o?.conditionNote || '' }, { immediate: true })
 function saveCondition() {
   data.updateOrder(order.value.id, { conditionNote: conditionNote.value.trim() })
-  toast.success(t('common.saved'))
-}
-function toggleDeposit(value) {
-  data.setDepositRefunded(order.value.id, value)
   toast.success(t('common.saved'))
 }
 async function removeOrder() {
@@ -210,7 +205,7 @@ async function removeOrder() {
           <p class="mt-2 text-xs text-stone-400">{{ t('orders.rentalHint') }}</p>
         </div>
 
-        <!-- Rental cycle: период, залог, состояние при возврате -->
+        <!-- Rental cycle: период, состояние при возврате -->
         <div class="sm-card p-5">
           <h2 class="mb-3 font-semibold text-stone-800 dark:text-stone-100">📅 {{ t('orders.rental') }}</h2>
           <div class="space-y-2 text-sm">
@@ -222,26 +217,6 @@ async function removeOrder() {
               <span class="text-stone-500 dark:text-stone-400">{{ t('builder.returnDate') }}</span>
               <span class="font-medium" :class="order.returnDate ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400'">{{ order.returnDate ? dateTime(order.returnDate) : '—' }}</span>
             </div>
-          </div>
-
-          <!-- Deposit -->
-          <div class="mt-3 border-t border-stone-200 pt-3 dark:border-stone-800">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-stone-500 dark:text-stone-400">💰 {{ t('builder.deposit') }}</span>
-              <span class="font-semibold text-stone-700 dark:text-stone-200">{{ money(order.deposit || 0) }}</span>
-            </div>
-            <label
-              v-if="(order.deposit || 0) > 0"
-              class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-stone-600 dark:text-stone-300"
-            >
-              <input
-                type="checkbox"
-                class="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500"
-                :checked="order.depositRefunded"
-                @change="toggleDeposit($event.target.checked)"
-              />
-              {{ t('orders.depositRefunded') }}
-            </label>
           </div>
 
           <!-- Condition on return -->
@@ -346,16 +321,12 @@ async function removeOrder() {
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <label class="sm-label">{{ t('builder.issueDate') }}</label>
-                <input v-model="edit.targetDate" type="datetime-local" class="sm-field" />
+                <DateTimePicker v-model="edit.targetDate" :placeholder="t('datepicker.select')" />
               </div>
               <div>
                 <label class="sm-label">{{ t('builder.returnDate') }}</label>
-                <input v-model="edit.returnDate" type="datetime-local" :min="edit.targetDate" class="sm-field" />
+                <DateTimePicker v-model="edit.returnDate" :min="edit.targetDate" :placeholder="t('datepicker.select')" />
               </div>
-            </div>
-            <div>
-              <label class="sm-label">{{ t('builder.deposit') }}</label>
-              <MoneyInput v-model="edit.deposit" class="sm-field" placeholder="0" />
             </div>
             <div>
               <label class="sm-label">{{ t('builder.address') }}</label>
