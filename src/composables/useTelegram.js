@@ -6,7 +6,6 @@ const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp || null : nul
 // Real Telegram client vs. opened in a normal browser.
 const isTelegram = !!(tg && tg.platform && tg.platform !== 'unknown')
 
-let mainHandler = null
 let backHandler = null
 
 export function useTelegram() {
@@ -15,22 +14,6 @@ export function useTelegram() {
     tg.ready()
     tg.expand?.()
     tg.disableVerticalSwipes?.()
-  }
-
-  function setMainButton(text, onClick) {
-    if (!tg) return
-    if (mainHandler) tg.MainButton.offClick(mainHandler)
-    mainHandler = onClick
-    tg.MainButton.setText(text)
-    tg.MainButton.onClick(onClick)
-    tg.MainButton.show()
-  }
-
-  function hideMainButton() {
-    if (!tg) return
-    if (mainHandler) tg.MainButton.offClick(mainHandler)
-    mainHandler = null
-    tg.MainButton.hide()
   }
 
   function setBackButton(visible, onClick) {
@@ -60,5 +43,5 @@ export function useTelegram() {
     }
   }
 
-  return { tg, isTelegram, ready, setMainButton, hideMainButton, setBackButton, setHeaderColor, haptic }
+  return { tg, isTelegram, ready, setBackButton, setHeaderColor, haptic }
 }
