@@ -43,7 +43,7 @@ const stats = computed(() => [
   { key: 'dashboard.totalOrders', value: data.orders.length, icon: '🧾', tint: 'from-brand-500 to-brand-600' },
   { key: 'dashboard.revenue', value: money(revenue.value), icon: '💰', tint: 'from-gold-400 to-gold-600' },
   { key: 'dashboard.clients', value: data.clients.length, icon: '👥', tint: 'from-emerald-500 to-emerald-600' },
-  { key: 'dashboard.products', value: data.products.length, icon: '🎁', tint: 'from-violet-500 to-violet-600' },
+  { key: 'dashboard.products', value: data.products.length, icon: '📦', tint: 'from-violet-500 to-violet-600' },
 ])
 
 // ---- Finance ----

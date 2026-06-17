@@ -177,7 +177,7 @@ async function resetDemo() {
         @click="mobilePanel = true"
       >
         <span class="flex items-center gap-2 text-sm font-medium">
-          🎁 {{ cart.count }} {{ t('builder.items') }}
+          {{ cart.count }} {{ t('builder.items') }}
         </span>
         <span class="flex items-center gap-2 font-semibold">
           {{ money(cart.total) }}

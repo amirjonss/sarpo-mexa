@@ -7,9 +7,9 @@ defineProps({
 <template>
   <div class="flex items-center gap-2.5">
     <span
-      class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-gold-500 text-lg shadow-sm shadow-brand-600/30"
+      class="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-gold-500 text-sm font-bold text-white shadow-sm shadow-brand-600/30"
     >
-      🎁
+      SM
     </span>
     <span v-if="!compact" class="flex flex-col leading-none">
       <span class="text-lg font-bold tracking-tight text-stone-800 dark:text-stone-100">

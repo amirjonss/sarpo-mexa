@@ -20,7 +20,7 @@ const errors = reactive({ name: false, phone: false, targetDate: false })
 const minDate = computed(() => new Date().toISOString().slice(0, 16))
 
 onMounted(() => {
-  if (cart.isEmpty) router.replace('/box')
+  if (cart.isEmpty) router.replace('/')
 })
 
 const lines = computed(() =>
@@ -112,7 +112,7 @@ function submit() {
             <span class="text-xl font-bold text-brand-600 dark:text-brand-400">{{ money(cart.total) }}</span>
           </div>
           <BaseButton type="submit" variant="primary" size="lg" block class="mt-5">{{ t('checkout.place') }}</BaseButton>
-          <RouterLink to="/box" class="mt-3 block text-center text-sm text-stone-500 hover:underline dark:text-stone-400">← {{ t('nav.box') }}</RouterLink>
+          <RouterLink to="/" class="mt-3 block text-center text-sm text-stone-500 hover:underline dark:text-stone-400">← {{ t('nav.home') }}</RouterLink>
         </div>
       </div>
     </form>

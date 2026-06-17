@@ -2,13 +2,11 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import { useCartStore } from '@/stores/cart'
 import AppLogo from './AppLogo.vue'
 import ThemeToggle from './ThemeToggle.vue'
 import LangSwitcher from './LangSwitcher.vue'
 
 const { t } = useI18n()
-const cart = useCartStore()
 const mobileOpen = ref(false)
 
 const links = [
@@ -40,23 +38,7 @@ const links = [
         <LangSwitcher />
         <ThemeToggle />
 
-        <RouterLink
-          to="/box"
-          class="relative grid h-9 w-9 place-items-center rounded-xl text-stone-600 transition hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800"
-          :aria-label="t('nav.box')"
-        >
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m21 8-9 4-9-4 9-4 9 4Zm0 0v8l-9 4m9-12-9 4m0 0L3 8m9 4v8m0 0-9-4V8" />
-          </svg>
-          <span
-            v-if="cart.count"
-            class="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-brand-600 px-1 text-[11px] font-bold text-white"
-          >
-            {{ cart.count }}
-          </span>
-        </RouterLink>
-
-        <RouterLink
+<RouterLink
           to="/admin"
           class="hidden rounded-xl border border-stone-300 px-3 py-2 text-sm font-medium text-stone-600 transition hover:bg-stone-100 sm:inline-flex dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
         >

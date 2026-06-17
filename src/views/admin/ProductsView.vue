@@ -128,7 +128,7 @@ async function remove(p) {
         </div>
       </div>
     </div>
-    <EmptyState v-else icon="🎁" :title="t('products.empty')" />
+    <EmptyState v-else icon="📦" :title="t('products.empty')" />
 
     <BaseModal v-model="modalOpen" :title="editingId ? t('products.editTitle') : t('products.createTitle')">
       <div class="space-y-4">

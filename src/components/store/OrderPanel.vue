@@ -20,6 +20,36 @@ const { haptic } = useTelegram()
 
 const form = reactive({ name: '', phone: '', address: '', targetDate: '', note: '' })
 const errors = reactive({ name: false, phone: false, targetDate: false })
+
+// Pick an existing client (fills name + phone) or leave blank to create a new one.
+const clientSearch = ref('')
+const clientMenuOpen = ref(false)
+const selectedClientId = ref(null)
+
+const filteredClients = computed(() => {
+  const q = clientSearch.value.trim().toLowerCase()
+  const digits = q.replace(/\D/g, '')
+  const list = data.clients
+  if (!q) return list.slice(0, 50)
+  return list
+    .filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (digits && c.phone.replace(/\D/g, '').includes(digits)),
+    )
+    .slice(0, 50)
+})
+
+function selectClient(c) {
+  selectedClientId.value = c.id
+  form.name = c.name
+  form.phone = c.phone
+  clientSearch.value = ''
+  clientMenuOpen.value = false
+  errors.name = false
+  errors.phone = false
+  haptic('light')
+}
 // Per-product unit price override (discount for this order only).
 const prices = reactive({})
 const paid = ref(0) // prepayment entered at creation (0 = unpaid, = total = full)
@@ -55,7 +85,8 @@ function validate() {
 
 function submit() {
   if (cart.isEmpty || !validate()) return
-  const clientId = data.findOrCreateClient(form.name.trim(), form.phone.trim())
+  const clientId =
+    selectedClientId.value ?? data.findOrCreateClient(form.name.trim(), form.phone.trim())
   const orderId = data.addOrder({
     clientId,
     targetDate: form.targetDate,
@@ -75,6 +106,8 @@ function submit() {
   form.address = ''
   form.targetDate = ''
   form.note = ''
+  clientSearch.value = ''
+  selectedClientId.value = null
   paid.value = 0
   toast.success(t('builder.created', { id: orderId }))
   haptic('success')
@@ -85,7 +118,7 @@ function submit() {
 <template>
   <div class="flex h-full flex-col">
     <div class="flex items-center justify-between">
-      <h2 class="font-semibold text-stone-800 dark:text-stone-100">🎁 {{ t('builder.boxTitle') }}</h2>
+      <h2 class="font-semibold text-stone-800 dark:text-stone-100">{{ t('builder.boxTitle') }}</h2>
       <button
         v-if="!cart.isEmpty"
         class="text-xs font-medium text-stone-400 hover:text-red-500"
@@ -96,12 +129,7 @@ function submit() {
     </div>
 
     <!-- Items -->
-    <div v-if="cart.isEmpty" class="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-stone-200 py-10 text-center dark:border-stone-700">
-      <span class="text-3xl">📦</span>
-      <p class="mt-2 max-w-[12rem] text-sm text-stone-400">{{ t('builder.boxEmpty') }}</p>
-    </div>
-
-    <ul v-else class="mt-3 space-y-2">
+    <ul v-if="!cart.isEmpty" class="mt-3 space-y-2">
       <li v-for="l in lines" :key="l.product.id" class="rounded-xl bg-stone-50 p-2 dark:bg-stone-800/50">
         <div class="flex items-center gap-3">
           <ProductThumb :product="l.product" rounded="rounded-lg" class="h-11 w-11 shrink-0" />
@@ -152,11 +180,59 @@ function submit() {
     <!-- Recipient + delivery -->
     <form class="mt-5 space-y-3" @submit.prevent="submit">
       <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">{{ t('builder.recipient') }}</p>
-      <div>
-        <input v-model="form.name" class="sm-field" :class="errors.name && '!border-red-500'" :placeholder="t('builder.name')" />
+
+      <!-- Name with embedded client-picker icon -->
+      <div class="relative">
+        <input
+          v-model="form.name"
+          class="sm-field pr-10"
+          :class="errors.name && '!border-red-500'"
+          :placeholder="t('builder.name')"
+          @input="selectedClientId = null"
+        />
+        <button
+          type="button"
+          class="absolute right-2 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-lg transition"
+          :class="selectedClientId ? 'text-brand-500 dark:text-brand-400' : 'text-stone-400 hover:bg-stone-100 hover:text-brand-600 dark:hover:bg-stone-700'"
+          @click="clientMenuOpen = !clientMenuOpen"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-5.356-3.712M9 20H4v-2a4 4 0 015.356-3.712M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+
+        <!-- Client dropdown -->
+        <div v-if="clientMenuOpen" class="absolute inset-x-0 top-full z-30 mt-1">
+          <div class="fixed inset-0 -z-10" @click="clientMenuOpen = false; clientSearch = ''" />
+          <div class="rounded-xl border border-stone-200 bg-white shadow-lg dark:border-stone-700 dark:bg-stone-800">
+            <div class="border-b border-stone-100 p-2 dark:border-stone-700">
+              <input
+                v-model="clientSearch"
+                class="sm-field py-1.5 text-sm"
+                :placeholder="t('builder.selectClient')"
+                autocomplete="off"
+                @click.stop
+              />
+            </div>
+            <ul class="max-h-52 overflow-auto py-1">
+              <li
+                v-for="c in filteredClients"
+                :key="c.id"
+                class="flex cursor-pointer items-center justify-between gap-3 px-3 py-2 text-sm hover:bg-stone-50 dark:hover:bg-stone-700/60"
+                :class="c.id === selectedClientId ? 'bg-brand-50 dark:bg-brand-500/10' : ''"
+                @click="selectClient(c)"
+              >
+                <span class="truncate font-medium text-stone-700 dark:text-stone-200">{{ c.name }}</span>
+                <span class="shrink-0 text-xs text-stone-400">{{ c.phone }}</span>
+              </li>
+              <li v-if="!filteredClients.length" class="px-3 py-2 text-sm text-stone-400">{{ t('builder.noClients') }}</li>
+            </ul>
+          </div>
+        </div>
       </div>
+
       <div>
-        <input v-model="form.phone" class="sm-field" :class="errors.phone && '!border-red-500'" placeholder="+998 ..." />
+        <input v-model="form.phone" class="sm-field" :class="errors.phone && '!border-red-500'" placeholder="+998 ..." @input="selectedClientId = null" />
       </div>
       <div>
         <textarea v-model="form.address" rows="2" class="sm-field resize-none" :placeholder="t('builder.address')" />

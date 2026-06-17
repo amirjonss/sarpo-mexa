@@ -66,10 +66,10 @@ function addToBox() {
         <div class="mt-7 flex items-center gap-3">
           <template v-if="inBox">
             <QtyStepper :model-value="inBox" @increment="cart.increment(product.id)" @decrement="cart.decrement(product.id)" />
-            <RouterLink to="/box"><BaseButton variant="gold" size="lg">{{ t('catalog.inBox') }} →</BaseButton></RouterLink>
+            <RouterLink to="/"><BaseButton variant="gold" size="lg">{{ t('catalog.inBox') }} →</BaseButton></RouterLink>
           </template>
           <BaseButton v-else variant="primary" size="lg" :disabled="stock === 0" @click="addToBox">
-            🎁 {{ t('product.addToBox') }}
+            {{ t('product.addToBox') }}
           </BaseButton>
         </div>
       </div>

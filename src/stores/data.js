@@ -99,7 +99,7 @@ export const useDataStore = defineStore('data', () => {
       price: Number(data.price) || 0,
       categoryId: data.categoryId ? Number(data.categoryId) : null,
       image: data.image || '',
-      emoji: data.emoji || '🎁',
+      emoji: data.emoji || '',
     })
     inventory.value.push({ id: nextId(inventory.value), productId: id, quantity: Number(data.quantity) || 0 })
   }
