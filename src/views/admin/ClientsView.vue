@@ -10,6 +10,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 import IconTrash from '@/components/ui/IconTrash.vue'
 import IconPencil from '@/components/ui/IconPencil.vue'
 
@@ -100,7 +101,7 @@ async function remove(c) {
         </div>
         <div>
           <label class="sm-label">{{ t('clients.fieldPhone') }}</label>
-          <input v-model="form.phone" class="sm-field" placeholder="+998 ..." />
+          <PhoneInput v-model="form.phone" class="sm-field" />
         </div>
       </div>
       <template #footer="{ close }">

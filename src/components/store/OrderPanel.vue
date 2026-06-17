@@ -6,7 +6,10 @@ import { useCartStore } from '@/stores/cart'
 import { useFormat } from '@/composables/useFormat'
 import { useToast } from '@/composables/useToast'
 import { useTelegram } from '@/composables/useTelegram'
+import { isValidPhone } from '@/composables/usePhone'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import MoneyInput from '@/components/ui/MoneyInput.vue'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 
 const emit = defineEmits(['created'])
@@ -78,7 +81,7 @@ const total = computed(() => lines.value.reduce((s, l) => s + priceOf(l.product)
 
 function validate() {
   errors.name = !form.name.trim()
-  errors.phone = !form.phone.trim()
+  errors.phone = !isValidPhone(form.phone)
   errors.targetDate = !form.targetDate
   return !errors.name && !errors.phone && !errors.targetDate
 }
@@ -147,11 +150,8 @@ function submit() {
         <div class="mt-2 flex items-center justify-between gap-2 pl-1">
           <label class="text-xs font-medium text-stone-500 dark:text-stone-400">{{ t('builder.unitPrice') }}</label>
           <div class="flex items-center gap-1.5">
-            <input
-              v-model.number="prices[l.product.id]"
-              type="number"
-              min="0"
-              step="1000"
+            <MoneyInput
+              v-model="prices[l.product.id]"
               class="sm-field h-8 w-28 px-2 py-1 text-right text-sm"
               :class="Number(prices[l.product.id]) < l.product.price ? '!border-emerald-400 text-emerald-600 dark:text-emerald-400' : ''"
             />
@@ -173,7 +173,7 @@ function submit() {
         <span>{{ t('payments.prepay') }}</span>
         <button type="button" class="text-xs font-medium text-brand-600 hover:underline dark:text-brand-400" @click="paid = total">{{ t('payments.payFull') }}</button>
       </label>
-      <input v-model.number="paid" type="number" min="0" :max="total" step="1000" class="sm-field" placeholder="0" />
+      <MoneyInput v-model="paid" class="sm-field" placeholder="0" />
       <p class="mt-1 text-xs text-stone-400">{{ t('payments.balance') }}: {{ money(Math.max(0, total - (Number(paid) || 0))) }}</p>
     </div>
 
@@ -232,7 +232,7 @@ function submit() {
       </div>
 
       <div>
-        <input v-model="form.phone" class="sm-field" :class="errors.phone && '!border-red-500'" placeholder="+998 ..." @input="selectedClientId = null" />
+        <PhoneInput v-model="form.phone" class="sm-field" :class="errors.phone && '!border-red-500'" @update:model-value="selectedClientId = null" />
       </div>
       <div>
         <textarea v-model="form.address" rows="2" class="sm-field resize-none" :placeholder="t('builder.address')" />

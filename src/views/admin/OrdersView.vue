@@ -16,16 +16,37 @@ const { money, date } = useFormat()
 const base = useSectionBase()
 
 const statusFilter = ref('all')
+const search = ref('')
 
 const filtered = computed(() => {
-  const list = statusFilter.value === 'all' ? data.orders : data.orders.filter((o) => o.status === statusFilter.value)
-  return [...list].sort((a, b) => b.id - a.id)
+  const q = search.value.trim().toLowerCase()
+  const qDigits = q.replace(/\D/g, '')
+  return data.orders
+    .filter((o) => statusFilter.value === 'all' || o.status === statusFilter.value)
+    .filter((o) => {
+      if (!q) return true
+      const client = data.clientById(o.clientId)
+      const name = (client?.name || '').toLowerCase()
+      const phone = (client?.phone || '').replace(/\D/g, '')
+      return (
+        String(o.id).includes(qDigits) ||
+        name.includes(q) ||
+        (qDigits && phone.includes(qDigits))
+      )
+    })
+    .sort((a, b) => b.id - a.id)
 })
 </script>
 
 <template>
   <div class="mx-auto max-w-7xl px-4 py-6">
     <PageHeader :title="t('orders.title')" :subtitle="t('orders.subtitle')" />
+
+    <!-- search -->
+    <div class="relative mb-4">
+      <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" d="m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" /></svg>
+      <input v-model="search" :placeholder="t('orders.searchPlaceholder')" class="sm-field pl-11" />
+    </div>
 
     <!-- status filter -->
     <div class="mb-4 flex flex-wrap gap-2">

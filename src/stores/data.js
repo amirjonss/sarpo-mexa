@@ -204,6 +204,15 @@ export const useDataStore = defineStore('data', () => {
     if (o && !o.returned) applyStock(o.items, +1)
     orders.value = orders.value.filter((o) => o.id !== id)
   }
+  // Edit delivery details / recipient of an existing order (not the line items).
+  function updateOrder(id, patch) {
+    const o = orders.value.find((o) => o.id === Number(id))
+    if (!o) return
+    if (patch.targetDate !== undefined) o.targetDate = patch.targetDate
+    if (patch.address !== undefined) o.address = patch.address
+    if (patch.note !== undefined) o.note = patch.note
+    if (patch.clientId !== undefined) o.clientId = Number(patch.clientId)
+  }
   function orderById(id) {
     return orders.value.find((o) => o.id === Number(id))
   }
@@ -343,6 +352,7 @@ export const useDataStore = defineStore('data', () => {
     findOrCreateClient,
     addOrder,
     updateOrderStatus,
+    updateOrder,
     deleteOrder,
     orderById,
     ordersByClient,

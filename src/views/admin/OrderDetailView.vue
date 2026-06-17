@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useDataStore, localized } from '@/stores/data'
@@ -11,9 +11,12 @@ import { ORDER_STATUSES } from '@/stores/seed'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import QtyStepper from '@/components/ui/QtyStepper.vue'
+import MoneyInput from '@/components/ui/MoneyInput.vue'
+import PhoneInput from '@/components/ui/PhoneInput.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 import ProductPickerModal from '@/components/store/ProductPickerModal.vue'
 import IconTrash from '@/components/ui/IconTrash.vue'
+import IconPencil from '@/components/ui/IconPencil.vue'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -68,8 +71,33 @@ function pick(pid) {
   data.addOrderItem(order.value.id, pid, 1)
   toast.success(localized(data.productById(pid)?.name, locale.value))
 }
-function setPrice(itemId, e) {
-  data.updateOrderItemPrice(order.value.id, itemId, e.target.value)
+
+// ---- Edit recipient + delivery details ----
+const editing = ref(false)
+const edit = reactive({ name: '', phone: '', targetDate: '', address: '', note: '' })
+
+function startEdit() {
+  edit.name = client.value?.name || ''
+  edit.phone = client.value?.phone || ''
+  edit.targetDate = order.value.targetDate || ''
+  edit.address = order.value.address || ''
+  edit.note = order.value.note || ''
+  editing.value = true
+}
+function saveEdit() {
+  if (client.value) {
+    data.updateClient(client.value.id, {
+      name: edit.name.trim() || client.value.name,
+      phone: edit.phone.trim(),
+    })
+  }
+  data.updateOrder(order.value.id, {
+    targetDate: edit.targetDate,
+    address: edit.address.trim(),
+    note: edit.note.trim(),
+  })
+  editing.value = false
+  toast.success(t('common.saved'))
 }
 async function removeOrder() {
   if (await confirm(t('common.deleteConfirm', { name: `#${order.value.id}` }))) {
@@ -124,13 +152,10 @@ async function removeOrder() {
                 <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span class="text-xs text-stone-400">{{ t('builder.unitPrice') }}</span>
                   <span class="inline-flex items-center gap-1">
-                    <input
-                      :value="data.orderItemPrice(item)"
-                      type="number"
-                      min="0"
-                      step="1000"
+                    <MoneyInput
+                      :model-value="data.orderItemPrice(item)"
                       class="sm-field h-7 w-24 px-2 py-0.5 text-right text-sm"
-                      @change="setPrice(item.id, $event)"
+                      @update:model-value="data.updateOrderItemPrice(order.id, item.id, $event || 0)"
                     />
                     <span class="text-xs text-stone-400">{{ t('common.currency') }}</span>
                   </span>
@@ -213,28 +238,71 @@ async function removeOrder() {
               {{ t('payments.fillBalance') }}: {{ money(data.orderBalance(order)) }}
             </button>
             <div class="flex gap-2">
-              <input v-model.number="payAmount" type="number" min="0" step="1000" class="sm-field" :placeholder="t('payments.amount')" />
+              <MoneyInput v-model="payAmount" class="sm-field" :placeholder="t('payments.amount')" />
               <BaseButton variant="secondary" @click="addPayment">+ {{ t('payments.addPayment') }}</BaseButton>
             </div>
           </div>
         </div>
 
         <div class="sm-card p-5">
-          <h2 class="mb-3 font-semibold text-stone-800 dark:text-stone-100">👤 {{ t('orders.client') }}</h2>
-          <RouterLink v-if="client" :to="`${base}/clients/${client.id}`" class="block rounded-xl p-2 -m-2 transition hover:bg-stone-50 dark:hover:bg-stone-800">
-            <div class="font-medium text-brand-600 hover:underline dark:text-brand-400">{{ client.name }}</div>
-            <div class="text-sm text-stone-500 dark:text-stone-400">{{ client.phone }}</div>
-          </RouterLink>
-          <div class="mt-4 space-y-2 border-t border-stone-200 pt-4 text-sm dark:border-stone-800">
-            <div class="flex justify-between"><span class="text-stone-500 dark:text-stone-400">{{ t('orders.targetDate') }}</span><span class="font-medium text-stone-700 dark:text-stone-200">{{ dateTime(order.targetDate) }}</span></div>
-            <div class="flex justify-between"><span class="text-stone-500 dark:text-stone-400">{{ t('common.date') }}</span><span class="font-medium text-stone-700 dark:text-stone-200">{{ date(order.createdAt) }}</span></div>
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="font-semibold text-stone-800 dark:text-stone-100">👤 {{ t('orders.client') }}</h2>
+            <button
+              v-if="!editing"
+              type="button"
+              class="inline-flex items-center gap-1 text-xs font-medium text-stone-400 transition hover:text-brand-600 dark:hover:text-brand-400"
+              :title="t('orders.editDelivery')"
+              @click="startEdit"
+            >
+              <IconPencil /> {{ t('common.edit') }}
+            </button>
           </div>
-          <div v-if="order.address" class="mt-4 flex gap-2 rounded-xl bg-stone-50 p-3 text-sm text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-            <span class="shrink-0">📍</span>
-            <span>{{ order.address }}</span>
-          </div>
-          <div v-if="order.note" class="mt-4 rounded-xl bg-stone-50 p-3 text-sm text-stone-600 dark:bg-stone-800 dark:text-stone-300">
-            💬 {{ order.note }}
+
+          <!-- read mode -->
+          <template v-if="!editing">
+            <RouterLink v-if="client" :to="`${base}/clients/${client.id}`" class="block rounded-xl p-2 -m-2 transition hover:bg-stone-50 dark:hover:bg-stone-800">
+              <div class="font-medium text-brand-600 hover:underline dark:text-brand-400">{{ client.name }}</div>
+              <div class="text-sm text-stone-500 dark:text-stone-400">{{ client.phone }}</div>
+            </RouterLink>
+            <div class="mt-4 space-y-2 border-t border-stone-200 pt-4 text-sm dark:border-stone-800">
+              <div class="flex justify-between"><span class="text-stone-500 dark:text-stone-400">{{ t('orders.targetDate') }}</span><span class="font-medium text-stone-700 dark:text-stone-200">{{ dateTime(order.targetDate) }}</span></div>
+              <div class="flex justify-between"><span class="text-stone-500 dark:text-stone-400">{{ t('common.date') }}</span><span class="font-medium text-stone-700 dark:text-stone-200">{{ date(order.createdAt) }}</span></div>
+            </div>
+            <div v-if="order.address" class="mt-4 flex gap-2 rounded-xl bg-stone-50 p-3 text-sm text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+              <span class="shrink-0">📍</span>
+              <span>{{ order.address }}</span>
+            </div>
+            <div v-if="order.note" class="mt-4 rounded-xl bg-stone-50 p-3 text-sm text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+              💬 {{ order.note }}
+            </div>
+          </template>
+
+          <!-- edit mode -->
+          <div v-else class="space-y-3">
+            <div>
+              <label class="sm-label">{{ t('builder.name') }}</label>
+              <input v-model="edit.name" class="sm-field" :placeholder="t('builder.name')" />
+            </div>
+            <div>
+              <label class="sm-label">{{ t('builder.phone') }}</label>
+              <PhoneInput v-model="edit.phone" class="sm-field" />
+            </div>
+            <div>
+              <label class="sm-label">{{ t('orders.targetDate') }}</label>
+              <input v-model="edit.targetDate" type="datetime-local" class="sm-field" />
+            </div>
+            <div>
+              <label class="sm-label">{{ t('builder.address') }}</label>
+              <textarea v-model="edit.address" rows="2" class="sm-field resize-none" :placeholder="t('builder.addressPlaceholder')" />
+            </div>
+            <div>
+              <label class="sm-label">{{ t('builder.note') }}</label>
+              <textarea v-model="edit.note" rows="2" class="sm-field resize-none" :placeholder="t('builder.notePlaceholder')" />
+            </div>
+            <div class="flex gap-2 pt-1">
+              <BaseButton variant="secondary" size="sm" block @click="editing = false">{{ t('common.cancel') }}</BaseButton>
+              <BaseButton variant="primary" size="sm" block @click="saveEdit">{{ t('common.save') }}</BaseButton>
+            </div>
           </div>
         </div>
       </div>

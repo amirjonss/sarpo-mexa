@@ -9,6 +9,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import MoneyInput from '@/components/ui/MoneyInput.vue'
 import ProductThumb from '@/components/store/ProductThumb.vue'
 import IconTrash from '@/components/ui/IconTrash.vue'
 
@@ -153,7 +154,7 @@ async function remove(p) {
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="sm-label">{{ t('products.fieldPrice') }}</label>
-            <input v-model="form.price" type="number" min="0" class="sm-field" />
+            <MoneyInput v-model="form.price" class="sm-field" />
           </div>
           <div>
             <label class="sm-label">{{ t('inventory.quantity') }}</label>
