@@ -14,10 +14,6 @@ const routes = [
       { path: 'orders/:id', name: 'store-order-detail', component: () => import('@/views/admin/OrderDetailView.vue') },
       { path: 'clients', name: 'store-clients', component: () => import('@/views/admin/ClientsView.vue') },
       { path: 'clients/:id', name: 'store-client-detail', component: () => import('@/views/admin/ClientDetailView.vue') },
-      { path: 'catalog', name: 'catalog', component: () => import('@/views/store/CatalogView.vue') },
-      { path: 'product/:id', name: 'product', component: () => import('@/views/store/ProductView.vue') },
-{ path: 'checkout', name: 'checkout', component: () => import('@/views/store/CheckoutView.vue') },
-      { path: 'order-success', name: 'order-success', component: () => import('@/views/store/OrderSuccessView.vue') },
     ],
   },
   {

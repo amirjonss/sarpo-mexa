@@ -1,35 +1,13 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useDataStore } from './data'
 
-const STORAGE_KEY = 'sm.box'
-
-function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
-  } catch {
-    /* ignore */
-  }
-  return []
-}
-
-// The "box" — products the client is assembling into a gift.
+// The "box" — products being assembled into the current order. Kept in memory
+// only: a half-built order should not survive a reload (the recipient/delivery
+// fields aren't persisted either, so reviving just the items would desync).
 export const useCartStore = defineStore('cart', () => {
   const data = useDataStore()
-  const items = ref(load()) // [{ productId, quantity }]
-
-  watch(
-    items,
-    (v) => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(v))
-      } catch {
-        /* ignore */
-      }
-    },
-    { deep: true },
-  )
+  const items = ref([]) // [{ productId, quantity }]
 
   const count = computed(() => items.value.reduce((s, i) => s + i.quantity, 0))
   const distinctCount = computed(() => items.value.length)
