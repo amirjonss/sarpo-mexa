@@ -10,7 +10,9 @@ const { t } = useI18n()
 const items = [
   { to: '/admin', key: 'nav.dashboard', icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
   { to: '/admin/orders', key: 'nav.orders', icon: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2' },
+  { to: '/admin/calendar', key: 'nav.calendar', icon: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z' },
   { to: '/admin/products', key: 'nav.products', icon: 'm21 8-9 4-9-4 9-4 9 4Zm0 0v8l-9 4-9-4V8' },
+  { to: '/admin/sets', key: 'nav.sets', icon: 'M3 7h18M3 7l1.5 12.5A2 2 0 0 0 6.5 21h11a2 2 0 0 0 2-1.5L21 7M3 7l3-4h12l3 4M9 11v6M15 11v6' },
   { to: '/admin/categories', key: 'nav.categories', icon: 'M4 6h16M4 12h16M4 18h10' },
   { to: '/admin/clients', key: 'nav.clients', icon: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-1a6 6 0 0 1 12 0v1' },
   { to: '/admin/inventory', key: 'nav.inventory', icon: 'M3 7l9-4 9 4-9 4-9-4Zm0 0v10l9 4 9-4V7' },

@@ -37,6 +37,11 @@ function onCreated() {
   mobilePanel.value = false
 }
 
+function addSet(set) {
+  cart.addSet(set.id)
+  toast.success(t('builder.setAdded', { name: localized(set.name, locale.value) }))
+}
+
 async function resetDemo() {
   if (await confirm(t('builder.resetConfirm'))) {
     cart.clear()
@@ -65,6 +70,51 @@ async function resetDemo() {
     <div class="grid gap-6 lg:grid-cols-[1fr_360px]">
       <!-- Catalog / picker -->
       <div>
+        <!-- Ready-made sets (комплекты) -->
+        <section v-if="data.sets.length" class="mb-5">
+          <h2 class="mb-2.5 text-sm font-semibold text-stone-700 dark:text-stone-200">{{ t('builder.sets') }}</h2>
+          <div class="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 xl:grid-cols-3">
+            <div
+              v-for="s in data.sets"
+              :key="s.id"
+              class="sm-card flex w-60 shrink-0 snap-start flex-col overflow-hidden sm:w-auto"
+            >
+              <div class="flex gap-3 p-3">
+                <img
+                  v-if="s.image"
+                  :src="s.image"
+                  alt=""
+                  class="h-16 w-16 shrink-0 rounded-lg object-cover"
+                />
+                <div class="min-w-0 flex-1">
+                  <p class="truncate text-sm font-semibold text-stone-800 dark:text-stone-100">{{ localized(s.name, locale) }}</p>
+                  <p class="mt-0.5 text-xs text-stone-500 dark:text-stone-400">
+                    {{ data.setItemCount(s) }} {{ t('builder.setItems') }}
+                  </p>
+                  <p class="mt-1 text-sm font-bold text-stone-700 dark:text-stone-200">{{ money(data.setTotal(s)) }}</p>
+                </div>
+              </div>
+              <div class="mt-auto flex items-center justify-between gap-2 px-3 pb-3">
+                <span
+                  class="text-[11px] font-medium"
+                  :class="data.setAvailable(s) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-400'"
+                >
+                  <template v-if="data.setAvailable(s) > 0">{{ data.setAvailable(s) }} {{ t('builder.setAvailable') }}</template>
+                  <template v-else>{{ t('builder.setOutOfStock') }}</template>
+                </span>
+                <button
+                  class="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-brand-700 disabled:opacity-40"
+                  :disabled="data.setAvailable(s) === 0"
+                  @click="addSet(s)"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" /></svg>
+                  {{ t('builder.addSet') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Toolbar -->
         <div class="mb-4 space-y-3">
           <div class="relative">

@@ -34,6 +34,7 @@ export const useDataStore = defineStore('data', () => {
 
   const categories = ref(initial.categories)
   const products = ref(initial.products)
+  const sets = ref(initial.sets ?? [])
   const inventory = ref(initial.inventory)
   const clients = ref(initial.clients)
   const orders = ref(initial.orders)
@@ -41,7 +42,7 @@ export const useDataStore = defineStore('data', () => {
 
   // Persist any change to localStorage (debounced via microtask-free deep watch).
   watch(
-    [categories, products, inventory, clients, orders, users],
+    [categories, products, sets, inventory, clients, orders, users],
     () => {
       try {
         localStorage.setItem(
@@ -49,6 +50,7 @@ export const useDataStore = defineStore('data', () => {
           JSON.stringify({
             categories: categories.value,
             products: products.value,
+            sets: sets.value,
             inventory: inventory.value,
             clients: clients.value,
             orders: orders.value,
@@ -117,6 +119,43 @@ export const useDataStore = defineStore('data', () => {
     inventory.value = inventory.value.filter((i) => i.productId !== id)
   }
 
+  // ---- Sets (комплекты) — curated bundles of products ----------------------
+  const setById = (id) => sets.value.find((s) => s.id === Number(id))
+  // Sum of base product prices × quantities in the set.
+  const setTotal = (set) =>
+    (set?.items || []).reduce((sum, it) => sum + (productById(it.productId)?.price || 0) * it.quantity, 0)
+  const setItemCount = (set) => (set?.items || []).reduce((sum, it) => sum + it.quantity, 0)
+  // Lowest number of whole sets that can be assembled from current stock.
+  const setAvailable = (set) => {
+    const items = set?.items || []
+    if (!items.length) return 0
+    return Math.min(...items.map((it) => Math.floor(stockOf(it.productId) / it.quantity)))
+  }
+
+  function addSet(data) {
+    const id = nextId(sets.value)
+    sets.value.push({
+      id,
+      name: data.name,
+      categoryId: data.categoryId ? Number(data.categoryId) : null,
+      image: data.image || '',
+      items: (data.items || []).map((it) => ({ productId: Number(it.productId), quantity: Math.max(1, Number(it.quantity) || 1) })),
+    })
+    return id
+  }
+  function updateSet(id, data) {
+    const s = setById(id)
+    if (!s) return
+    if (data.name !== undefined) s.name = data.name
+    if (data.categoryId !== undefined) s.categoryId = data.categoryId ? Number(data.categoryId) : null
+    if (data.image !== undefined) s.image = data.image
+    if (data.items !== undefined)
+      s.items = data.items.map((it) => ({ productId: Number(it.productId), quantity: Math.max(1, Number(it.quantity) || 1) }))
+  }
+  function deleteSet(id) {
+    sets.value = sets.value.filter((s) => s.id !== Number(id))
+  }
+
   // ---- Inventory -----------------------------------------------------------
   function setStock(productId, quantity) {
     const inv = inventory.value.find((i) => i.productId === productId)
@@ -159,7 +198,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   // ---- Orders --------------------------------------------------------------
-  function addOrder({ clientId, targetDate, address, note, items, status = 'new', paid = 0 }) {
+  function addOrder({ clientId, targetDate, returnDate = '', deposit = 0, address, note, items, status = 'new', paid = 0 }) {
     const id = orders.value.length ? Math.max(...orders.value.map((o) => o.id)) + 1 : 1001
     const built = items.map((it, idx) => ({
       id: idx + 1,
@@ -173,6 +212,10 @@ export const useDataStore = defineStore('data', () => {
       id,
       clientId,
       targetDate,
+      returnDate: returnDate || '',
+      deposit: Math.max(0, Number(deposit) || 0),
+      depositRefunded: false,
+      conditionNote: '',
       address: address || '',
       status,
       returned: isClosed(status),
@@ -209,9 +252,17 @@ export const useDataStore = defineStore('data', () => {
     const o = orders.value.find((o) => o.id === Number(id))
     if (!o) return
     if (patch.targetDate !== undefined) o.targetDate = patch.targetDate
+    if (patch.returnDate !== undefined) o.returnDate = patch.returnDate
+    if (patch.deposit !== undefined) o.deposit = Math.max(0, Number(patch.deposit) || 0)
     if (patch.address !== undefined) o.address = patch.address
     if (patch.note !== undefined) o.note = patch.note
+    if (patch.conditionNote !== undefined) o.conditionNote = patch.conditionNote
     if (patch.clientId !== undefined) o.clientId = Number(patch.clientId)
+  }
+  // Залог: пометить возвращён ли депозит клиенту (после возврата комплекта).
+  function setDepositRefunded(id, value) {
+    const o = orderById(id)
+    if (o) o.depositRefunded = !!value
   }
   function orderById(id) {
     return orders.value.find((o) => o.id === Number(id))
@@ -284,6 +335,49 @@ export const useDataStore = defineStore('data', () => {
     return order.items.reduce((sum, it) => sum + it.quantity, 0)
   }
 
+  // ---- Rental availability by date -----------------------------------------
+  // Orders reserve their items for the window [targetDate .. returnDate] while
+  // they are still out (not returned/cancelled). This lets the calendar show
+  // what is free on a given wedding date instead of a single global stock count.
+  const dayOf = (s) => (s ? String(s).slice(0, 10) : '')
+  const isActive = (o) => !o.returned
+  const orderCoversDate = (o, day) => {
+    const start = dayOf(o.targetDate)
+    if (!start) return false
+    const end = dayOf(o.returnDate) || start
+    return day >= start && day <= end
+  }
+  // Total units the business owns = current free stock + everything currently out.
+  function productCapacity(productId) {
+    let out = 0
+    for (const o of orders.value) {
+      if (!isActive(o)) continue
+      for (const it of o.items) if (it.productId === productId) out += it.quantity
+    }
+    return stockOf(productId) + out
+  }
+  function productReservedOn(productId, day) {
+    let qty = 0
+    for (const o of orders.value) {
+      if (!isActive(o) || !orderCoversDate(o, day)) continue
+      for (const it of o.items) if (it.productId === productId) qty += it.quantity
+    }
+    return qty
+  }
+  function productAvailableOn(productId, day) {
+    return productCapacity(productId) - productReservedOn(productId, day)
+  }
+  function setAvailableOn(set, day) {
+    const items = set?.items || []
+    if (!items.length) return 0
+    return Math.min(...items.map((it) => Math.floor(productAvailableOn(it.productId, day) / it.quantity)))
+  }
+  // Orders by lifecycle event on a given day — for calendar cells.
+  const ordersIssuedOn = (day) => orders.value.filter((o) => dayOf(o.targetDate) === day)
+  const ordersReturnDueOn = (day) =>
+    orders.value.filter((o) => isActive(o) && dayOf(o.returnDate) === day)
+  const ordersActiveOn = (day) => orders.value.filter((o) => isActive(o) && orderCoversDate(o, day))
+
   // ---- Users ---------------------------------------------------------------
   function addUser(data) {
     users.value.push({ id: nextId(users.value), username: data.username, roles: data.roles || [] })
@@ -315,6 +409,7 @@ export const useDataStore = defineStore('data', () => {
     const fresh = buildSeed()
     categories.value = fresh.categories
     products.value = fresh.products
+    sets.value = fresh.sets
     inventory.value = fresh.inventory
     clients.value = fresh.clients
     orders.value = fresh.orders
@@ -330,6 +425,7 @@ export const useDataStore = defineStore('data', () => {
   return {
     categories,
     products,
+    sets,
     inventory,
     clients,
     orders,
@@ -345,6 +441,13 @@ export const useDataStore = defineStore('data', () => {
     addProduct,
     updateProduct,
     deleteProduct,
+    setById,
+    setTotal,
+    setItemCount,
+    setAvailable,
+    addSet,
+    updateSet,
+    deleteSet,
     setStock,
     addClient,
     updateClient,
@@ -353,6 +456,14 @@ export const useDataStore = defineStore('data', () => {
     addOrder,
     updateOrderStatus,
     updateOrder,
+    setDepositRefunded,
+    productCapacity,
+    productReservedOn,
+    productAvailableOn,
+    setAvailableOn,
+    ordersIssuedOn,
+    ordersReturnDueOn,
+    ordersActiveOn,
     deleteOrder,
     orderById,
     ordersByClient,

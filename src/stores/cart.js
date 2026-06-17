@@ -24,6 +24,12 @@ export const useCartStore = defineStore('cart', () => {
     if (existing) existing.quantity += qty
     else items.value.push({ productId, quantity: qty })
   }
+  // Add every product of a ready-made set (комплект) to the box at once.
+  function addSet(setId) {
+    const set = data.setById(setId)
+    if (!set) return
+    for (const it of set.items) add(it.productId, it.quantity)
+  }
   function setQty(productId, qty) {
     const existing = items.value.find((i) => i.productId === productId)
     if (!existing) return
@@ -46,5 +52,5 @@ export const useCartStore = defineStore('cart', () => {
     items.value = []
   }
 
-  return { items, count, distinctCount, total, isEmpty, qtyOf, add, setQty, increment, decrement, remove, clear }
+  return { items, count, distinctCount, total, isEmpty, qtyOf, add, addSet, setQty, increment, decrement, remove, clear }
 })

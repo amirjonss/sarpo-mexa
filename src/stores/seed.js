@@ -4,7 +4,7 @@
 // Each category is a design "set" (набор); product photos live in /public/products/<set>/.
 
 // Bump whenever seed data changes so existing localStorage is refreshed.
-export const SEED_VERSION = 6
+export const SEED_VERSION = 8
 
 // `returned` = boxes came back from the client; closing an order restores stock (rental).
 export const ORDER_STATUSES = ['new', 'packing', 'ready', 'delivering', 'delivered', 'returned', 'cancelled']
@@ -58,6 +58,48 @@ export function buildSeed() {
     { id: 13, productId: 13, quantity: 8 },
   ]
 
+  // Ready-made sets (комплекты) — a curated bundle of products with quantities.
+  // Sarpo is rented as a finished set, so staff add a whole set to an order in
+  // one click instead of picking items one by one. `items` reference products.
+  const sets = [
+    {
+      id: 1,
+      name: { ru: 'Пудровый комплект', uz: 'Pudra to‘plami' },
+      categoryId: 1,
+      image: '/products/01/01.png',
+      items: [
+        { productId: 1, quantity: 1 },
+        { productId: 2, quantity: 1 },
+        { productId: 3, quantity: 2 },
+        { productId: 4, quantity: 1 },
+      ],
+    },
+    {
+      id: 2,
+      name: { ru: 'Белый комплект', uz: 'Oq to‘plam' },
+      categoryId: 2,
+      image: '/products/02/01.png',
+      items: [
+        { productId: 5, quantity: 1 },
+        { productId: 6, quantity: 2 },
+        { productId: 7, quantity: 1 },
+        { productId: 9, quantity: 1 },
+      ],
+    },
+    {
+      id: 3,
+      name: { ru: 'Кремовый комплект', uz: 'Krem to‘plam' },
+      categoryId: 3,
+      image: '/products/03/01.png',
+      items: [
+        { productId: 10, quantity: 1 },
+        { productId: 11, quantity: 1 },
+        { productId: 12, quantity: 1 },
+        { productId: 13, quantity: 2 },
+      ],
+    },
+  ]
+
   const clients = [
     { id: 1, name: 'Дилноза Каримова', phone: '+998 90 123 45 67' },
     { id: 2, name: 'Бекзод Рахимов', phone: '+998 91 234 56 78' },
@@ -73,6 +115,10 @@ export function buildSeed() {
       id: 1001,
       clientId: 1,
       targetDate: addDaysAt(2, 14, 0),
+      returnDate: addDaysAt(4, 12, 0),
+      deposit: 500000,
+      depositRefunded: false,
+      conditionNote: '',
       status: 'packing',
       returned: false,
       note: 'Свадебный комплект на торжество',
@@ -89,6 +135,10 @@ export function buildSeed() {
       id: 1002,
       clientId: 2,
       targetDate: addDaysAt(5, 11, 30),
+      returnDate: addDaysAt(7, 12, 0),
+      deposit: 400000,
+      depositRefunded: false,
+      conditionNote: '',
       status: 'new',
       returned: false,
       note: '',
@@ -104,6 +154,10 @@ export function buildSeed() {
       id: 1003,
       clientId: 3,
       targetDate: addDaysAt(-3, 16, 0),
+      returnDate: addDaysAt(-1, 12, 0),
+      deposit: 450000,
+      depositRefunded: false,
+      conditionNote: '',
       status: 'delivered',
       returned: false,
       note: 'Доставлено, ожидаем возврат коробок',
@@ -119,6 +173,10 @@ export function buildSeed() {
       id: 1004,
       clientId: 1,
       targetDate: addDaysAt(1, 10, 0),
+      returnDate: addDaysAt(3, 12, 0),
+      deposit: 500000,
+      depositRefunded: false,
+      conditionNote: '',
       status: 'ready',
       returned: false,
       note: '',
@@ -187,7 +245,7 @@ export function buildSeed() {
     { id: 3, username: 'sardor', roles: ['packer', 'courier'] },
   ]
 
-  return { categories, products, inventory, clients, orders, users }
+  return { categories, products, sets, inventory, clients, orders, users }
 }
 
 function addDays(n) {
